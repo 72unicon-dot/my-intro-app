@@ -8,6 +8,71 @@
 
 ---
 
+## 🚀 수강생 빠른 시작 (처음 받았을 때)
+
+> **사전 준비**: Node.js 18+ 설치 ([nodejs.org](https://nodejs.org)) / VS Code 권장
+
+### 방법 A. ZIP 다운로드 (Git 모르는 분 추천)
+
+1. 이 페이지 우측 상단 **Code** 버튼 → **Download ZIP** 클릭
+2. 다운로드된 `my-intro-app-main.zip` 압축 풀기 (바탕화면 권장)
+3. 폴더명에 `-main` 이 붙어 있다면 **`my-intro-app`** 으로 이름 변경 (선택)
+4. PowerShell 실행 → 폴더로 이동:
+   ```powershell
+   cd "C:\Users\본인이름\Desktop\my-intro-app"
+   ```
+5. 의존성 설치 (1~2분, 한 번만):
+   ```powershell
+   npm install
+   ```
+6. 환경변수 파일 만들기 — 아래 **2단계** 참고
+7. 개발 서버 시작:
+   ```powershell
+   npm run dev
+   ```
+8. 브라우저에서 [http://localhost:3000](http://localhost:3000) 열기
+
+### 방법 B. Git Clone (Git CLI 가능한 분)
+
+```bash
+git clone https://github.com/72unicon-dot/my-intro-app.git
+cd my-intro-app
+npm install
+# .env.local 만들기 (다음 섹션 참고)
+npm run dev
+```
+
+### 환경변수 (.env.local) 만들기
+
+1. `.env.local.example` 파일을 같은 폴더에 **복사** → 이름을 `.env.local` 로 변경
+2. VS Code 또는 메모장으로 열어 **본인의 Supabase / 관리자 키** 입력:
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT-ID.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-PUBLIC-KEY
+   ADMIN_PASSWORD=본인이_정한_비밀번호
+   SUPABASE_SERVICE_ROLE_KEY=YOUR-SERVICE-ROLE-KEY
+   ```
+
+> 💡 **env가 없어도 앱은 동작합니다** — 노란 "DEMO MODE" 배너와 함께 샘플 데이터로 화면이 뜹니다.
+> 본인 데이터를 보려면 `.env.local`을 채우고 서버를 재시작하세요 (`Ctrl+C` → `npm run dev`).
+
+### 자주 막히는 곳 — 한 줄 해결
+
+| 증상 | 해결 |
+|---|---|
+| `Port 3000 is in use, trying 3001` | 기존 dev 서버가 살아 있음 — 그 창에서 `Ctrl+C` 후 다시 |
+| `localhost:3000` 에서 ERR_CONNECTION_REFUSED | 서버가 안 떠있음 — `npm run dev` 다시 |
+| 노란 **DEMO MODE** 배너가 계속 뜸 | `.env.local`의 4개 키 오타 확인 후 서버 재시작 |
+| Supabase 연결은 됐는데 화면이 비어있음 | Supabase Table Editor에서 `profiles` 행 1개 추가 |
+| `/admin` 비밀번호가 틀리다고 함 | `.env.local` 수정 후 **반드시 서버 재시작** |
+
+### 다음 단계
+- `docs/Project0_실습교재.pptx` 를 열어 7STEP을 순서대로 따라가세요
+- Supabase 가입 → `supabase/schema.sql` 실행 → 자신의 정보 입력
+- 마지막에 GitHub 본인 저장소 만들어서 Push → Vercel 배포
+
+---
+
 ## 폴더 구조
 
 ```
