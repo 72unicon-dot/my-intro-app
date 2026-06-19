@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin, ADMIN_TABLES, type AdminTable } from "@/lib/supabase-admin";
+import { getSupabaseAdmin, ADMIN_TABLES, type AdminTable } from "@/lib/supabase-admin";
 
 export const runtime = "nodejs";
 
@@ -28,6 +28,7 @@ function isAllowedTable(t: string): t is AdminTable {
 export async function GET(req: NextRequest) {
   const bad = checkPassword(req);
   if (bad) return bad;
+  const supabaseAdmin = getSupabaseAdmin();
 
   const [profiles, skills, projects, media] = await Promise.all([
     supabaseAdmin.from("profiles").select("*").order("created_at"),
@@ -50,6 +51,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const bad = checkPassword(req);
   if (bad) return bad;
+  const supabaseAdmin = getSupabaseAdmin();
 
   const body = await req.json().catch(() => null);
   if (!body || !isAllowedTable(body.table) || typeof body.row !== "object") {
@@ -85,6 +87,7 @@ export async function POST(req: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const bad = checkPassword(req);
   if (bad) return bad;
+  const supabaseAdmin = getSupabaseAdmin();
 
   const body = await req.json().catch(() => null);
   if (!body || !isAllowedTable(body.table) || typeof body.id !== "string") {
