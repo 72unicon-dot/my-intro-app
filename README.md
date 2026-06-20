@@ -49,7 +49,6 @@ npm run dev
    ```
    NEXT_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT-ID.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-PUBLIC-KEY
-   ADMIN_PASSWORD=본인이_정한_비밀번호
    SUPABASE_SERVICE_ROLE_KEY=YOUR-SERVICE-ROLE-KEY
    ```
 
@@ -62,9 +61,9 @@ npm run dev
 |---|---|
 | `Port 3000 is in use, trying 3001` | 기존 dev 서버가 살아 있음 — 그 창에서 `Ctrl+C` 후 다시 |
 | `localhost:3000` 에서 ERR_CONNECTION_REFUSED | 서버가 안 떠있음 — `npm run dev` 다시 |
-| 노란 **DEMO MODE** 배너가 계속 뜸 | `.env.local`의 4개 키 오타 확인 후 서버 재시작 |
+| 노란 **DEMO MODE** 배너가 계속 뜸 | `.env.local`의 Supabase URL·키 오타 확인 후 서버 재시작 |
 | Supabase 연결은 됐는데 화면이 비어있음 | Supabase Table Editor에서 `profiles` 행 1개 추가 |
-| `/admin` 비밀번호가 틀리다고 함 | `.env.local` 수정 후 **반드시 서버 재시작** |
+| `/admin`에서 데이터를 불러오지 못함 | `SUPABASE_SERVICE_ROLE_KEY` 확인 후 서버 재시작 |
 
 ### 다음 단계
 - `docs/Project0_실습교재.pptx` 를 열어 7STEP을 순서대로 따라가세요
@@ -200,19 +199,18 @@ git push -u origin main
 
 SQL을 만지지 않고도 웹 화면에서 직접 데이터를 추가/수정/삭제할 수 있습니다.
 
-1. `.env.local` 에 두 개를 추가합니다:
-   - `ADMIN_PASSWORD` = 본인이 정한 비밀번호 (예: `myproject1234`)
+1. `.env.local` 에 다음 값을 추가합니다:
    - `SUPABASE_SERVICE_ROLE_KEY` = Supabase Dashboard → Settings → API → **service_role** 키
    > service_role 키는 RLS를 우회하므로 **절대 외부에 공유 금지**. `NEXT_PUBLIC_` 접두사 X.
 2. 개발 서버 재시작 후 [http://localhost:3000/admin](http://localhost:3000/admin) 접속
-3. 비밀번호 입력 → 4개 폼(Profile / Skills / Projects / Media)이 보입니다
+3. 접속 즉시 4개 폼(Profile / Skills / Projects / Media)이 보입니다
 4. 각 폼에서 데이터를 입력하고 메인 페이지(`/`)에서 60초 안에 반영 확인
-5. Vercel 배포 후에도 사용하려면 Vercel 대시보드의 환경변수에 두 키를 추가하세요
+5. Vercel 배포 후에도 사용하려면 Vercel 대시보드에 `SUPABASE_SERVICE_ROLE_KEY`를 추가하세요
 
-### 보안 동작
-- 모든 쓰기 요청은 서버의 `/api/admin` 라우트에서 `x-admin-password` 헤더를 검증
-- service_role 키는 서버에서만 사용되므로 브라우저에 노출되지 않음
-- 비밀번호는 브라우저의 sessionStorage 에만 임시 저장 (탭 닫으면 사라짐)
+### 공개 변경 모드 동작
+- `/admin`과 `/api/admin`은 별도 로그인 없이 사용할 수 있습니다
+- 접속한 누구나 데이터를 추가·수정·삭제할 수 있습니다
+- service_role 키는 서버에서만 사용되므로 브라우저에 노출되지 않습니다
 
 ---
 

@@ -13,53 +13,38 @@ type AdminData = {
 const EMPTY_DATA: AdminData = { profiles: [], skills: [], projects: [], media: [] };
 
 export default function AdminPage() {
-  // 비밀번호는 sessionStorage 에만 저장 (탭 닫으면 사라짐)
-  const [password, setPassword] = useState("");
-  const [unlocked, setUnlocked] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AdminData>(EMPTY_DATA);
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem("admin_pwd");
-    if (saved) {
-      setPassword(saved);
-      void unlock(saved);
-    }
+    void refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function call(method: "GET" | "POST" | "DELETE", body?: object, pwd?: string) {
+  async function call(method: "GET" | "POST" | "DELETE", body?: object) {
     const res = await fetch("/api/admin", {
       method,
       headers: {
-        "Content-Type": "application/json",
-        "x-admin-password": pwd ?? password
+        "Content-Type": "application/json"
       },
       body: body ? JSON.stringify(body) : undefined,
       cache: "no-store"
     });
-    return res.json();
-  }
-
-  async function unlock(pwd: string) {
-    setLoading(true);
-    const res = await call("GET", undefined, pwd);
-    setLoading(false);
-    if (!res.ok) {
-      setMessage(res.error ?? "잠금 해제 실패");
-      return;
-    }
-    sessionStorage.setItem("admin_pwd", pwd);
-    setPassword(pwd);
-    setUnlocked(true);
-    setData(res.data);
-    setMessage(null);
+    return res.json().catch(() => ({ ok: false, error: `서버 오류 (${res.status})` }));
   }
 
   async function refresh() {
-    const res = await call("GET");
-    if (res.ok) setData(res.data);
+    try {
+      const res = await call("GET");
+      if (res.ok) {
+        setData(res.data);
+        setMessage(null);
+      } else {
+        setMessage(`오류: ${res.error ?? "데이터를 불러오지 못했습니다."}`);
+      }
+    } catch {
+      setMessage("오류: 서버에 연결하지 못했습니다.");
+    }
   }
 
   async function addRow(table: string, row: Record<string, unknown>) {
@@ -78,57 +63,15 @@ export default function AdminPage() {
     if (res.ok) await refresh();
   }
 
-  if (!unlocked) {
-    return (
-      <section className="mx-auto max-w-sm">
-        <h2>관리자 로그인</h2>
-        <p className="mb-4 text-sm text-slate-600">
-          .env.local 의 <code>ADMIN_PASSWORD</code> 와 동일한 값을 입력하세요.
-        </p>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void unlock(password);
-          }}
-          className="space-y-3"
-        >
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded border p-2"
-            placeholder="비밀번호"
-            autoFocus
-          />
-          <button
-            type="submit"
-            disabled={loading || !password}
-            className="w-full rounded bg-brand-600 py-2 text-white hover:bg-brand-700 disabled:opacity-50"
-          >
-            {loading ? "확인 중..." : "잠금 해제"}
-          </button>
-          {message && <p className="text-sm text-red-600">{message}</p>}
-        </form>
-      </section>
-    );
-  }
-
   const profile = data.profiles[0];
 
   return (
     <section className="space-y-12">
-      <header className="flex items-center justify-between">
-        <h2 className="!mb-0">관리자 · 데이터 입력</h2>
-        <button
-          onClick={() => {
-            sessionStorage.removeItem("admin_pwd");
-            setUnlocked(false);
-            setPassword("");
-          }}
-          className="text-sm text-slate-500 hover:underline"
-        >
-          잠그기
-        </button>
+      <header>
+        <h2 className="!mb-2">변경 가능 모드 · 데이터 입력</h2>
+        <p className="text-sm text-amber-700">
+          이 페이지에서는 누구나 데이터를 추가·수정·삭제할 수 있습니다.
+        </p>
       </header>
 
       {message && (

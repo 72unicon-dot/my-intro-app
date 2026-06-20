@@ -3,31 +3,12 @@ import { getSupabaseAdmin, ADMIN_TABLES, type AdminTable } from "@/lib/supabase-
 
 export const runtime = "nodejs";
 
-// 모든 요청은 헤더 x-admin-password 를 검사한다.
-// 일치하지 않으면 401을 돌려준다.
-function checkPassword(req: NextRequest): NextResponse | null {
-  const provided = req.headers.get("x-admin-password");
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) {
-    return NextResponse.json(
-      { ok: false, error: "ADMIN_PASSWORD 가 서버에 설정되지 않았습니다." },
-      { status: 500 }
-    );
-  }
-  if (provided !== expected) {
-    return NextResponse.json({ ok: false, error: "비밀번호가 올바르지 않습니다." }, { status: 401 });
-  }
-  return null;
-}
-
 function isAllowedTable(t: string): t is AdminTable {
   return (ADMIN_TABLES as readonly string[]).includes(t);
 }
 
 // 모든 4개 테이블의 데이터 한 번에 조회 (관리자 페이지 첫 진입 시 사용)
-export async function GET(req: NextRequest) {
-  const bad = checkPassword(req);
-  if (bad) return bad;
+export async function GET() {
   const supabaseAdmin = getSupabaseAdmin();
 
   const [profiles, skills, projects, media] = await Promise.all([
@@ -49,8 +30,6 @@ export async function GET(req: NextRequest) {
 
 // 행 추가 (또는 profile 의 경우 upsert)
 export async function POST(req: NextRequest) {
-  const bad = checkPassword(req);
-  if (bad) return bad;
   const supabaseAdmin = getSupabaseAdmin();
 
   const body = await req.json().catch(() => null);
@@ -85,8 +64,6 @@ export async function POST(req: NextRequest) {
 
 // 행 삭제 — body: { table, id }
 export async function DELETE(req: NextRequest) {
-  const bad = checkPassword(req);
-  if (bad) return bad;
   const supabaseAdmin = getSupabaseAdmin();
 
   const body = await req.json().catch(() => null);
